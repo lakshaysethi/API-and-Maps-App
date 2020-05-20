@@ -5,7 +5,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.android.volley.Request;
@@ -22,15 +24,18 @@ import org.json.JSONObject;
 public class MainActivity extends AppCompatActivity {
 
     String url1= "https://dog.ceo/api/breeds/image/random";
-
+    String url2 = "https://dog.ceo/api/breeds/list/all";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        final Spinner spinner = findViewById(R.id.spinner);
         final TextView tv1 = findViewById(R.id.textView1);
         final ImageView imgView1 = findViewById(R.id.imageView);
-        RequestQueue requestQ  = Volley.newRequestQueue(this.getApplicationContext());
+
+
         Response.Listener repListener=new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
@@ -55,7 +60,20 @@ public class MainActivity extends AppCompatActivity {
 
             }
         };
+
         JsonObjectRequest req = new JsonObjectRequest(Request.Method.GET, url1, null, repListener, errorListener);
+
+        RequestQueue requestQ  = Volley.newRequestQueue(this.getApplicationContext());
         requestQ.add(req);
+
+
+
+        ArrayAdapter<CharSequence> adapter = new ArrayAdapter()
+
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        spinner.setAdapter(adapter);
+
+
     }
 }
