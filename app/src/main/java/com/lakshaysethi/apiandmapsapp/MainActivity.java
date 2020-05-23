@@ -2,12 +2,16 @@ package com.lakshaysethi.apiandmapsapp;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.Response;
@@ -45,7 +49,7 @@ public class MainActivity extends AppCompatActivity {
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
 
 
-        Response.Listener repListener=new Response.Listener<JSONObject>() {
+        final Response.Listener repListener=new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject response) {
                 JSONObject respObj= response;
@@ -77,7 +81,7 @@ public class MainActivity extends AppCompatActivity {
 
             }
         };
-        Response.ErrorListener errorListener = new Response.ErrorListener() {
+        final Response.ErrorListener errorListener = new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
                 Log.d("err",error.toString());
@@ -87,35 +91,61 @@ public class MainActivity extends AppCompatActivity {
         };
 
 
-        Response.Listener repListener2=new Response.Listener<JSONObject>() {
-            @Override
-            public void onResponse(JSONObject response) {
-                Log.d("response",response.toString());
-                tv1.setText("");
-                try {
-
-                    String imageUrl1 = response.get("message").toString();
-                    Picasso.get().load(imageUrl1).into( imgView1);// i used picasso dependency for images
-
-                } catch (JSONException e) {
-                    tv1.setText(tv1.getText()+"\n\n\n could not load Image");
-                    e.printStackTrace();
-                }
-
-            }
-        };
 
 
 
-        RequestQueue requestQ  = Volley.newRequestQueue(this.getApplicationContext());
+        final RequestQueue requestQ  = Volley.newRequestQueue(this.getApplicationContext());
         JsonObjectRequest req = new JsonObjectRequest(Request.Method.GET, url2, null, repListener, errorListener);// get list of all breads
         requestQ.add(req);
 
         //JsonObjectRequest req2 = new JsonObjectRequest(Request.Method.GET, url3, null, repListener2, errorListener);
         //requestQ.add(req2);
 
+//// spinner on item selected listener :
+        final Context ctx = this.getApplicationContext();
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+
+                final String breed = spinnerArray.get(position).toString();
+                String selectedBreedUrl = "https://dog.ceo/api/breed/"+breed+"/images/random";
 
 
+                final Response.Listener repListener2=new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject response) {
+                        Log.d("response",response.toString());
+
+                        try {
+                            tv1.setText(breed);
+                            String imageUrl1 = response.get("message").toString();
+                            Picasso.get().load(imageUrl1).into( imgView1);// i used picasso dependency for images
+
+                        } catch (JSONException e) {
+                            tv1.setText(tv1.getText()+"\n\n\n could not load Image");
+                            e.printStackTrace();
+                        }
+
+                    }
+                };
+
+
+                JsonObjectRequest req = new JsonObjectRequest(Request.Method.GET, selectedBreedUrl, null, repListener2, errorListener);// get list of all breads
+                requestQ.add(req);
+
+
+
+                //String intPositionString = "pisition:"+ Integer.toString(position) + "Id: "+ Long.toString(id);
+                //Toast toast = Toast.makeText(ctx,intPositionString,Toast.LENGTH_LONG);
+                //toast.show();
+
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
 
     }
 }
